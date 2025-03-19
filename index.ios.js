@@ -3,7 +3,7 @@
  * @flow
  */
 import React, { Component, createRef } from 'react';
-import { processColor } from 'react-native';
+import { processColor, StyleSheet, View } from 'react-native';
 
 import NativeLinearGradient, { type Props } from './common';
 
@@ -37,31 +37,59 @@ export default class LinearGradient extends Component<Props> {
 
   render() {
     const {
-      start,
-      end,
+      children,
       colors,
+      end,
       locations,
       useAngle,
       angleCenter,
       angle,
+      start,
+      style,
       ...otherProps
     } = this.props;
+
     if ((colors && locations) && (colors.length !== locations.length)) {
       console.warn('LinearGradient colors and locations props should be arrays of the same length');
     }
 
+    const flatStyle = StyleSheet.flatten(style) || {};
+
+    let borderRadiusStyles = {};
+    // for (const [key, value] of Object.entries(flatStyle)) {
+    //   if(key.startsWith('border')) {
+    //     borderRadiusStyles[key] = value;
+    //   }
+    // }
+    if (flatStyle.borderTopRightRadius) {
+      borderRadiusStyles.borderTopRightRadius = flatStyle.borderTopRightRadius;
+    }
+    if (flatStyle.borderTopLeftRadius) {
+      borderRadiusStyles.borderTopLeftRadius = flatStyle.borderTopLeftRadius;
+    }
+    if (flatStyle.borderBottomRightRadius) {
+      borderRadiusStyles.borderBottomRightRadius = flatStyle.borderBottomRightRadius;
+    }
+    if (flatStyle.borderBottomLeftRadius) {
+      borderRadiusStyles.borderBottomLeftRadius = flatStyle.borderBottomLeftRadius;
+    }
+    if (flatStyle.borderRadius) {
+      borderRadiusStyles.borderRadius = flatStyle.borderRadius;
+    }
+
     return (
-      <NativeLinearGradient
-        ref={this.gradientRef}
-        {...otherProps}
-        startPoint={convertPoint('start', start)}
-        endPoint={convertPoint('end', end)}
-        colors={colors.map(processColor)}
-        locations={locations ? locations.slice(0, colors.length) : null}
-        useAngle={useAngle}
-        angleCenter={convertPoint('angleCenter', angleCenter)}
-        angle={angle}
-      />
+      <View ref={this.gradientRef} {...otherProps} style={style}>
+        <NativeLinearGradient
+          style={{position: 'absolute', top: 0, left: 0, bottom: 0, right: 0, ...borderRadiusStyles}}
+          colors={colors.map(processColor)}
+          startPoint={convertPoint('start', start)}
+          endPoint={convertPoint('end', end)}
+          useAngle={useAngle}
+          angleCenter={convertPoint('angleCenter', angleCenter)}
+          angle={angle}
+        />
+        {children}
+      </View>
     );
   }
 }
